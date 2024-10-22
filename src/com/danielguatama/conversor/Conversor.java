@@ -4,15 +4,14 @@ import java.util.Scanner;
 
 public class Conversor {
     public static void main(String[] args) {
+        ApiService apiService = new ApiService();
+        Scanner scanner = new Scanner(System.in);
 
         System.out.println("**************************************");
         System.out.println("Bienvenido/a, a tu Conversor de Monedas ");
         System.out.println("    BY Edwin Daniel Guatama Murcia    ");
 
-        Scanner scanner = new Scanner(System.in);
-
         while (true) {
-
             System.out.println("\nElige una opción: ");
             System.out.println("\n1. Convertir Pesos Colombianos a Dólares");
             System.out.println("2. Convertir Pesos Mexixanos a pesos Colombianos");
@@ -31,10 +30,14 @@ public class Conversor {
             System.out.println("Ingrese por favor la cantidad a convertir");
             double cantidad = scanner.nextDouble();
 
-
-
-
+            switch (opcion) {
+                case 1 -> apiService.convertir("COP", "USD", cantidad);
+                case 2 -> apiService.convertir("MXN", "COP", cantidad);
+                case 3 -> apiService.convertir("EUR", "COP", cantidad);
+                case 4 -> apiService.convertir("ARS", "EUR", cantidad);
+                case 5 -> apiService.convertir("USD", "EUR", cantidad);
+                default -> System.out.println("Opciòn NO VÁLIDA");
+            }
         }
     }
-
 }
