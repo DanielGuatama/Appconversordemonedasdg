@@ -1,57 +1,60 @@
 package com.danielguatama.conversor;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class ApiService {
+
     private static final String API_KEY = "54a74d82d1cfbc88fb259601";
     private static final String BASE_URL = "https://v6.exchangerate-api.com/v6/";
 
     public void convertir(String from, String to, double cantidad) {
         try {
-            // Generamos la URL con la moneda base que deseamos consultar
+
             String endpoint = BASE_URL + API_KEY + "/latest/" + from;
-            URL url = new URL(endpoint);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.connect();
+            URI url = URI.create(endpoint);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(url)
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Verifica que la respuesta sea exitosa (200 OK)
-            int responseCode = connection.getResponseCode();
-            if (responseCode != 200) {
-                throw new RuntimeException("Error en la respuesta de la API: " + responseCode);
-            }
+            // Verifica el código de estado de la respuesta
+            if (response.statusCode() == 200) {
+                // Usamos JsonParser para analizar la respuesta JSON
+                JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
 
-            // Leer la respuesta
-            InputStreamReader reader = new InputStreamReader(connection.getInputStream());
-            Gson gson = new Gson();
-            Respuesta respuesta = gson.fromJson(reader, Respuesta.class);
+                // Verificamos el resultado antes de convertir
+                if ("success".equals(jsonObject.get("result").getAsString())) {
+                    JsonObject conversionRates = jsonObject.getAsJsonObject("conversion_rates");
 
-            // Verificamos si la respuesta fue exitosa
-            if ("success".equals(respuesta.result)) {
-                // Accedemos a la tasa de cambio usando el código de la moneda destino
-                Double tasaCambio = respuesta.conversion_rates.get(to);
+                    // Validación y obtención de tasa de cambio
+                    if (!conversionRates.has(to)) {
+                        System.out.println("La moneda destino '" + to + "' no se encontró en la respuesta de la API.");
+                    } else {
+                        double tasaCambio = conversionRates.get(to).getAsDouble();
+                        double resultado = tasaCambio * cantidad;
 
-                if (tasaCambio != null) {
-                    double resultado = tasaCambio * cantidad;
-                    System.out.printf("Tasa de cambio: %.4f%n", tasaCambio);
-                    System.out.printf("%.2f %s = %.2f %s%n", cantidad, from, resultado, to);
+                        System.out.printf("Tasa de cambio: %.4f%n", tasaCambio);
+                        System.out.printf("%.2f %s = %.2f %s%n",cantidad, from,resultado, to);
+                    }
                 } else {
-                    System.out.println("Moneda destino no encontrada.");
+                    System.out.println("Error en la respuesta de la API.");
                 }
             } else {
-                System.out.println("Error al realizar la conversión.");
+                System.out.println("Error en la solicitud HTTP: " + response.statusCode());
             }
-
-            reader.close();
-            connection.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
+
 
 

@@ -29,6 +29,7 @@ public class Conversor {
 
             System.out.println("Ingrese por favor la cantidad a convertir");
             double cantidad = scanner.nextDouble();
+            scanner.nextLine();
 
             switch (opcion) {
                 case 1 -> apiService.convertir("COP", "USD", cantidad);
