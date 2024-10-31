@@ -45,16 +45,26 @@ public class ApiService {
                         System.out.printf("%.2f %s = %.2f %s%n",cantidad, from,resultado, to);
                     }
                 } else {
-                    System.out.println("Error en la respuesta de la API.");
+                    // Manejo de errores: lanza una excepción personalizada
+                    throw new ConversionException("Error en la respuesta de la API.");
                 }
             } else {
-                System.out.println("Error en la solicitud HTTP: " + response.statusCode());
+                // Manejo de errores: lanza una excepción personalizada
+                throw new ConversionException("Error en la solicitud HTTP: " + response.statusCode());
             }
+        } catch (ConversionException e) {
+            System.err.println("Error al convertir: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error inesperado: " + e.getMessage());
+        }
+    }
+
+    // Excepción personalizada para errores de conversión
+    public static class ConversionException extends Exception {
+        public ConversionException(String message) {
+            super(message);
         }
     }
 }
-
 
 

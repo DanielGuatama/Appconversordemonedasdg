@@ -11,6 +11,8 @@ public class Conversor {
         System.out.println("Bienvenido/a, a tu Conversor de Monedas ");
         System.out.println("    BY Edwin Daniel Guatama Murcia    ");
 
+
+        bucleExterno:
         while (true) {
             System.out.println("\nElige una opción: ");
             System.out.println("\n1. Convertir Pesos Colombianos a Dólares");
@@ -22,9 +24,17 @@ public class Conversor {
             System.out.println("\n**************************************");
 
             int opcion = scanner.nextInt();
-            if (opcion == 6) {
-                System.out.println("Saliendo...");
-                break;
+
+            while (true){
+                if (opcion == 6) {
+                    System.out.println("Saliendo...");
+                    break bucleExterno;
+                } else if (opcion>6 || opcion<1){
+                    System.out.println("Ingrese una opción válida");
+                    opcion = scanner.nextInt();
+                } else {
+                    break;
+                }
             }
 
             System.out.println("Ingrese por favor la cantidad a convertir");
